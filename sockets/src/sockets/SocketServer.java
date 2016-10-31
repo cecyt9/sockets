@@ -7,37 +7,41 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Vector;
 
 public class SocketServer {
- 
-   public static void main(String args[]) {
- 
-       Vector<String> datosRecibidos = new Vector<String>();
- 
-       try {
-             ServerSocket s = new ServerSocket(1234);
-             System.out.println("Esperando conexiones...");
-                   
-             while (true) {
-                    Socket cliente = s.accept();
-                    BufferedReader entrada = new BufferedReader(
-                             new InputStreamReader(cliente.getInputStream()));
-                    PrintWriter salida = new PrintWriter(
-             new OutputStreamWriter(cliente.getOutputStream()),true);
-                    String datos = entrada.readLine();
-                    if (datos.equals("DATOS")){
-                           for (int n=0; n<datosRecibidos.size(); n++ ){
-                                  salida.println(datosRecibidos.get(n));
-                           }
-                    } else {
-                           datosRecibidos.add(0, datos);
-                           salida.println("OK");
-                    }
-                    cliente.close();
-             }
-       } catch (IOException e) {
-             System.out.println(e);
-       }
-}
+
+    public static void main(String args[]) throws IOException {
+
+        BufferedReader entrada = null;
+        PrintWriter salida = null;
+
+        Socket socket = null;
+        //se crea una instancia de ServerSocket que estara atendiendo en el puerto 1234
+        ServerSocket serverSocket = new ServerSocket(1234);
+        System.out.println("Esperando conexion de cliente en el puerto 1234...");
+        
+        while (true) {
+            try {
+                //el ServerSocket da el acceso Socket al cliente que lo solicito
+                socket = serverSocket.accept();
+                
+                //se obtiene informacion(IP) del cliente
+                System.out.println("Conexion establecida desde la IP: " + socket.getInetAddress());
+                
+               //obtengo la entrada y la salida de bytes 
+               entrada = new BufferedReader( new InputStreamReader(socket.getInputStream()));
+               salida = new PrintWriter( new OutputStreamWriter(socket.getOutputStream()), true);
+               //leo el nombre que envia el cliente
+               String nombreCliente = entrada.readLine();
+               
+               //regreso un saludo como respuesta al cliente
+                String saludoServer = "Bienvenido " + nombreCliente + "!!";
+                salida.println(saludoServer);
+                socket.close();
+
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+        }
+    }
 }
